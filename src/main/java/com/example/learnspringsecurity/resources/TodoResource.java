@@ -1,7 +1,11 @@
 package com.example.learnspringsecurity.resources;
 
+import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,8 +17,8 @@ public class TodoResource {
 
     public static final List<Todo> TODO_LIST =
             List.of(
-                    new Todo("Codegym", "Learn Java"),
-                    new Todo("Codegym", "Learn Nodejs")
+                    new Todo("codegym", "Learn Java"),
+                    new Todo("codegym", "Learn Nodejs")
             );
 
     @GetMapping("/todos")
@@ -23,6 +27,11 @@ public class TodoResource {
     }
 
     @GetMapping("users/{username}/todos")
+//    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') AND #username == authentication.name")
+    @PostAuthorize("returnObject.username == 'codegym'")
+    @RolesAllowed({"ADMIN", "USER"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public Todo retrieveTodosForSpecificUser(@PathVariable String username) {
         return TODO_LIST.get(0);
     }
